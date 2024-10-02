@@ -1,0 +1,9 @@
+# This is a Databricks asset bundle definition for airbnb_datapipeline.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+# yaml-language-server: $schema=bundle_config_schema.json
+bundle:
+  name: airbnb_datapipeline
+
+include:
+  - ./resources/*.yaml
+

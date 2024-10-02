@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../bundle_config_schema.json
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://adb-275014819473646.6.azuredatabricks.net
+    resources:
+      jobs:
+        load_all_data_from_files:
+          name: data_ingestion_workflow
+          parameters:
+            - name: city
+              default: boston
+            - name: date
+              default: 03242024
+          tasks:
+            - task_key: load_listings
+              job_cluster_key: job_cluster
+              notebook_task:
+                notebook_path: ../src/Ingest_Listings_From_ADLS.py
+            - task_key: load_reviews
+              job_cluster_key: job_cluster
+              notebook_task:
+                notebook_path: ../src/Ingest_Reviews_From_ADLS.py
+            - task_key: load_calendars
+              job_cluster_key: job_cluster
+              notebook_task:
+                notebook_path: ../src/Ingest_Calendars_From_ADLS.ipynb
+              depends_on:
+                - task_key: load_reviews
+              python_wheel_task:
+                package_name: airbnb_datapipeline
+                entry_point: main
+              libraries:
+                # By default we just include the .whl file generated for the airbnb_datapipeline package.
+                # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
+                # for more information on how to add other libraries.
+                - whl: ../dist/*.whl
+          job_clusters:
+            - job_cluster_key: job_cluster
+              new_cluster:
+                spark_version: 14.3.x-scala2.12
+                node_type_id: Standard_D3_v2
+                autoscale:
+                  min_workers: 1
+                  max_workers: 2
+
+
